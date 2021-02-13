@@ -1,0 +1,161 @@
+﻿<Window x:Class="StockTable1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StockTable1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="550" Width="800">
+    <Window.Resources>
+        <!--<SolidColorBrush x:Key="clrPrimary" Color="{Binding UpColor}" />
+        <SolidColorBrush x:Key="clrSecondary" Color="{Binding DownColor}" />-->
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition />
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="STOCK TABLE" FontSize="20" Grid.Row="0" FontWeight="Bold" VerticalAlignment="Center"
+                   HorizontalAlignment="Center"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Rising Stock Color:" FontSize="13" VerticalAlignment="Center"
+                           Margin="10,0,0,0" FontWeight="Medium"/>
+                
+                <Button Style="{StaticResource ButtonStyle}" Height="30" Width="30"
+                        Click="UpColor_Click">
+                    <Button.Content>
+                        <Border BorderBrush="Black" BorderThickness="1" Height="15" Width="15" >
+                            <Rectangle Height="10" Width="10" Fill="{Binding UpColor, Mode=TwoWay}" 
+                                   Margin="1" Cursor="Hand" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+                        </Border>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Dowing Stock Color:" FontSize="13" VerticalAlignment="Center"
+                           Margin="10,0,0,0" FontWeight="Medium"/>
+                <Button Style="{StaticResource ButtonStyle}" Height="30" Width="30"
+                        Click="DownColor_Click">
+                    <Button.Content>
+                        <Border BorderBrush="Black" BorderThickness="1" Height="15" Width="15" >
+                            <Rectangle Height="10" Width="10" Fill="{Binding DownColor, Mode=TwoWay}" 
+                                   Margin="1" Cursor="Hand" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+                        </Border>
+                    </Button.Content>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding StockData}" AutoGenerateColumns="False"
+                  x:Name="Dg" Margin="5" IsReadOnly="True" RowStyle="{StaticResource DgRowStyle}"
+                  SelectionMode="Extended" RowHeight="30" HorizontalGridLinesBrush="Transparent">
+            
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Last Update" Binding="{Binding Value.LastUpdate, StringFormat=hh:mm:ss tt}"
+                                    Width="*" FontSize="13"/>
+                <DataGridTextColumn Header="Symbol" Binding="{Binding Key}" Width="*" FontSize="13"/>
+                <DataGridTemplateColumn Header="Price"  Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Value.Price}" Style="{StaticResource TbColorChange}"
+                                       FontSize="14"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Change"  Width="1.5*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Value.Change}" Style="{StaticResource TbColorChange}"
+                                           FontSize="14"/>
+                                <Canvas Width="20" Height="20" Margin="10,-1,0,5">
+                                    <Path >
+                                        <Path.Style>
+                                            <Style TargetType="Path">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Value.IsColor}" Value="True">
+                                                        <Setter Property="Data" Value="M15,20H9V12H4.16L12,4.16L19.84,12H15V20Z"/>
+                                                        <Setter Property="Fill" Value="{Binding Value.Color}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Value.IsColor}" Value="False">
+                                                        <Setter Property="Data" Value="M9,4H15V12H19.84L12,19.84L4.16,12H9V4Z"/>
+                                                        <Setter Property="Fill" Value="{Binding Value.Color}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Path.Style>
+                                    </Path>
+                                </Canvas>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StatusBar Grid.Row="3">
+            <TextBlock Text="{Binding Message}" Margin="5" Foreground="Red" FontSize="13"/>
+        </StatusBar>
+
+        <Popup Name="PopupColorPalette" IsOpen="False" StaysOpen="False"  Height="auto" Width="auto" PopupAnimation="Scroll"
+               Placement="Mouse" AllowsTransparency="True" VerticalOffset="-7" HorizontalOffset="50">
+            <Border BorderThickness="1" Background="White" BorderBrush="Black">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Background="LightGray" Grid.Row="0">
+                        <TextBlock Text="Standard Color" HorizontalAlignment="Left" Margin="4,3" FontSize="10"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Background="White">
+                        <Grid.Resources>
+                            <Style TargetType="{x:Type Rectangle}" >
+                                <EventSetter Event="MouseDown" Handler="Rectangle_MouseLeftButtonDown" />
+                                <Setter Property="Margin" Value="5"/>
+                                <Setter Property="Stroke" Value="Black"/>
+                                <Setter Property="StrokeThickness" Value="1"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Height" Value="15"/>
+                                <Setter Property="Width" Value="15"/>
+                            </Style>
+                        </Grid.Resources>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                            <Rectangle  Fill="Red" />
+                            <Rectangle  Fill="Yellow" />
+                            <Rectangle  Fill="Gray" />
+                            <Rectangle  Fill="Brown" />
+                            <Rectangle  Fill="White" />
+                            <Rectangle  Fill="Blue" />
+                            <Rectangle  Fill="Orange" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1">
+                            <Rectangle  Fill="Pink" />
+                            <Rectangle  Fill="Green" />
+                            <Rectangle  Fill="Purple" />
+                            <Rectangle  Fill="Black" />
+                            <Rectangle  Fill="Magenta" />
+                            <Rectangle  Fill="Violet" />
+                            <Rectangle  Fill="Indigo" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</Window>

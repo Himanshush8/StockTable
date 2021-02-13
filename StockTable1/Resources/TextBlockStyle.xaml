@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:StockTable1.Resources">
+    <Style TargetType="TextBlock" x:Key="TbColorChange">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Value.IsColor}" Value="True">
+                <Setter Property="Foreground" Value="{Binding Value.Color}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Value.IsColor}" Value="False">
+                <Setter Property="Foreground" Value="{Binding Value.Color}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>
