@@ -85,6 +85,29 @@ namespace StockTable1
             StartHub();
         }
 
+        public async void StartHub()
+        {
+            var _hubConnection = new HubConnectionBuilder()
+                .WithUrl(_baseUrl).Build();
+
+            _hubConnection.On<StockUpdate>("updateStockPrice", data =>
+            {
+                StockUpdateRe(data);
+            });
+            try
+            {
+                Message = "Waiting";
+                await _hubConnection.StartAsync();
+                Console.WriteLine("State " + _hubConnection.State);
+                Message = _hubConnection.State.ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToJson());
+                Message = e.ToJson();
+            }
+        }
+
         public void StockUpdateRe(StockUpdate stockUpdate)
         {
             try
@@ -109,29 +132,7 @@ namespace StockTable1
                 }
                 else
                 {
-                    if (Dg.SelectedItems.Count >= 3)
-                    {
-                        for (int i = 0; i < 2; i++)
-                        {
-                            (((KeyValuePair<string, StockTable1.Model.StockUpdate>)Dg.SelectedItems[i]).Value).IsSelected = false;
-                        }
-                    }
-                    var selected = StockData[stockUpdate.Symbol];
-                    var previousChange = selected.Change;
-                    if (selected.Change > 0)
-                    {
-                        selected.IsColor = true;
-                        selected.Color = UpColor;
-                    }
-                    else
-                    {
-                        selected.IsColor = false;
-                        selected.Color = DownColor;
-                    }
-                    selected.LastUpdate = DateTime.Now;
-                    selected.Price = stockUpdate.Price;
-                    selected.Change = stockUpdate.Change;
-                    selected.IsSelected = true;
+                    UpdateStock(stockUpdate);
                     //Dg.Items.Refresh();
                 }
             }
@@ -142,28 +143,32 @@ namespace StockTable1
             
         }
 
-        public async void StartHub()
+        private void UpdateStock(StockUpdate stockUpdate)
         {
-            var _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_baseUrl).Build();
-
-            _hubConnection.On<StockUpdate>("updateStockPrice", data =>
+            if (Dg.SelectedItems.Count >= 3)
             {
-                StockUpdateRe(data);
-            });
-            try
-            {
-                Message = "Waiting";
-                await _hubConnection.StartAsync();
-                Console.WriteLine("State " + _hubConnection.State);
-                Message = _hubConnection.State.ToString();
+                for (int i = 0; i < 2; i++)
+                {
+                    (((KeyValuePair<string, StockUpdate>)Dg.SelectedItems[i]).Value).IsSelected = false;
+                }
             }
-            catch (Exception e)
+            var selected = StockData[stockUpdate.Symbol];
+            if (!stockUpdate.Change.ToString().Contains('-'))
             {
-                Console.WriteLine(e.ToJson());
-                Message = e.ToJson();
-                throw;
+                selected.IsColor = true;
+                selected.Color = UpColor;
+                System.Diagnostics.Debug.WriteLine(stockUpdate.Change + "\t" + selected.IsColor);
             }
+            else
+            {
+                selected.IsColor = false;
+                selected.Color = DownColor;
+                System.Diagnostics.Debug.WriteLine(stockUpdate.Change + "\t" + selected.IsColor);
+            }
+            selected.LastUpdate = DateTime.Now;
+            selected.Price = stockUpdate.Price;
+            selected.Change = stockUpdate.Change;
+            selected.IsSelected = true;
         }
 
         private void Rectangle_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

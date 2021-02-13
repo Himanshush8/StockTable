@@ -12,8 +12,8 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
             <RowDefinition />
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
@@ -73,10 +73,14 @@
                 <DataGridTemplateColumn Header="Change"  Width="1.5*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
                                 <TextBlock Text="{Binding Value.Change}" Style="{StaticResource TbColorChange}"
                                            FontSize="14"/>
-                                <Canvas Width="20" Height="20" Margin="10,-1,0,5">
+                                <Canvas Width="20" Height="20" Margin="10,-1,0,5" Grid.Column="1">
                                     <Path >
                                         <Path.Style>
                                             <Style TargetType="Path">
@@ -94,7 +98,7 @@
                                         </Path.Style>
                                     </Path>
                                 </Canvas>
-                            </StackPanel>
+                            </Grid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -102,7 +106,7 @@
         </DataGrid>
 
         <StatusBar Grid.Row="3">
-            <TextBlock Text="{Binding Message}" Margin="5" Foreground="Red" FontSize="13"/>
+            <TextBlock Text="{Binding Message}" Margin="5,0" Foreground="Red" FontSize="13"/>
         </StatusBar>
 
         <Popup Name="PopupColorPalette" IsOpen="False" StaysOpen="False"  Height="auto" Width="auto" PopupAnimation="Scroll"
