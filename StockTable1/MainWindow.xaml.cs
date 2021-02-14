@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using StockTable1.DbContext;
 using StockTable1.Model;
 using StockTable1.ViewModel;
 using System;
@@ -77,7 +78,7 @@ namespace StockTable1
         {
             //MainViewModel mainViewModel = new MainViewModel();
             //this.DataContext = mainViewModel;
-            
+
             this.DataContext = this;
             UpColor = new SolidColorBrush(Colors.Green);
             DownColor = new SolidColorBrush(Colors.Red);
@@ -87,12 +88,13 @@ namespace StockTable1
 
         public async void StartHub()
         {
+            SqliteDataAccess.TruncateStock();
             var _hubConnection = new HubConnectionBuilder()
                 .WithUrl(_baseUrl).Build();
 
             _hubConnection.On<StockUpdate>("updateStockPrice", data =>
             {
-                StockUpdateRe(data);
+                StockUpdateCallBack(data);
             });
             try
             {
@@ -105,10 +107,11 @@ namespace StockTable1
             {
                 Console.WriteLine(e.ToJson());
                 Message = e.ToJson();
+                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        public void StockUpdateRe(StockUpdate stockUpdate)
+        public void StockUpdateCallBack(StockUpdate stockUpdate)
         {
             try
             {
@@ -119,28 +122,24 @@ namespace StockTable1
                         isColor = true;
                     else
                         isColor = false;
-                    StockData.Add(stockUpdate.Symbol, new StockUpdate
-                    {
-                        LastUpdate = DateTime.Now,
-                        Change = stockUpdate.Change,
-                        Symbol = stockUpdate.Symbol,
-                        Price = stockUpdate.Price,
-                        Color = isColor ? UpColor : DownColor,
-                        IsColor = isColor
-                    });
+
+                    stockUpdate.LastUpdate = DateTime.Now;
+                    stockUpdate.Color = isColor ? UpColor : DownColor;
+                    stockUpdate.IsColor = isColor;
+                    StockData.Add(stockUpdate.Symbol, stockUpdate);
+                    SqliteDataAccess.InsertStock(stockUpdate);
                     Dg.Items.Refresh();
                 }
                 else
                 {
                     UpdateStock(stockUpdate);
-                    //Dg.Items.Refresh();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-            
+
         }
 
         private void UpdateStock(StockUpdate stockUpdate)
@@ -169,6 +168,7 @@ namespace StockTable1
             selected.Price = stockUpdate.Price;
             selected.Change = stockUpdate.Change;
             selected.IsSelected = true;
+            SqliteDataAccess.UpdateStock(stockUpdate);
         }
 
         private void Rectangle_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
